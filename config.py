@@ -32,9 +32,7 @@ from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile import hook
 
-#from mywidgets import Volume
-
-from widgets.volume import VolumeWidget
+from colorscheme import colorscheme
 
 mod = "mod4"
 terminal = "kitty"
@@ -44,24 +42,6 @@ terminal = "kitty"
 def autostart():
     home = os.path.expanduser('~/.config/qtile/startup.sh')
     subprocess.call([home])
-
-
-#@lazy.function
-#def increase_volume(qtile):
-#    os.system("amixer -c 0 -q -D pulse set Master 2%-")
-
-
-volume = VolumeWidget()
-
-
-@lazy.function
-def increase_volume(qtile):
-    volume.increase_volume()
-
-
-@lazy.function
-def decrease_volume(qtile):
-    volume.decrease_volume()
 
 
 keys = [
@@ -91,15 +71,12 @@ keys = [
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
 
     Key([mod], "d", lazy.spawn("amixer -c 0 -q -D pulse set Master 2%+")),
-    Key([mod], "f", increase_volume),
 
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-    Key([mod], "f3", increase_volume()),
-    Key([mod], "f2", decrease_volume()),
+    Key([mod], "r", lazy.spawn("rofi -show run")),
 
 ]
 
@@ -152,26 +129,54 @@ volume_config = {
 
 screens = [
     Screen(
-        wallpaper="~/Pictures/wall.png",
+        wallpaper="~/Pictures/Wp.jpg",
+        wallpaper_mode="fill",
         top=bar.Bar(
             [
+                widget.Spacer(),
                 widget.CurrentLayout(),
-                widget.GroupBox(),
-                widget.Prompt(),
-                widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
+                widget.GroupBox(
+                    active=colorscheme["fg"],
+                    background=colorscheme["bg"],
+                    hide_unused=False,  # I love the true one, but it feels empty
+                    borderwidth=3,
+                    center_aligned=True,
+                    disable_drag=True,
+                    font="sans",
+                    fontsize=15,
+                    fontshadow=None,
+                    inactive=colorscheme["fg_dark"],
+                    highlight_color=colorscheme["dark5"],
+                    highlight_method="block",
+                    markup=True,
+                    rounded=False,
+                    this_screen_border=colorscheme["red"],
                 ),
-
+                widget.Spacer(),
+                widget.Prompt(),
+                widget.CPU(format='CPU: {load_percent}%'),
+                widget.Net(
+                    format='{down} ↓↑ {up}',
+                    prefix="M",
+                    fontsize=12,
+                    fontshadow=None,
+                    foreground=colorscheme["bg"],
+                    background=colorscheme["green1"]
+                ),
+                widget.Memory(measure_mem='G'),
+                widget.PulseVolume(
+                    limit_max_volume=True,
+                ),
+                widget.Battery(format="{percent:2.0%} {hour:d}:{min:02d}"),
+                widget.KeyboardLayout(
+                    configured_keyboards=["us", "ru"],
+                ),
                 widget.Systray(),
-                volume,
                 widget.Clock(),
                 widget.QuickExit(),
             ],
             24,
+            background=colorscheme["bg_transparent"],
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
