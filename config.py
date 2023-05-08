@@ -32,7 +32,7 @@ from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile import hook
 
-from colorscheme import colorscheme
+from colorscheme import colorscheme_GeekchanskiY as primary_colorscheme
 
 mod = "mod4"
 terminal = "kitty"
@@ -78,9 +78,58 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawn("rofi -show run")),
 
+    Key([mod], "Print", lazy.spawn("gnome-screenshot -i"))
+
 ]
 
-groups = [Group(i) for i in "12345678"]
+# groups = [Group(i) for i in "1234567890"]
+
+# I prefer to set groups like this because sometimes I work for a
+# while with the same spawn or match for certain windows
+
+groups = [
+    Group(
+        '1',
+        label='Home',
+    ),
+    Group(
+        '2',
+        label='C1',
+    ),
+    Group(
+        '3',
+        label='C2',
+    ),
+    Group(
+        '4',
+        label='C3',
+    ),
+    Group(
+        '5',
+        label='S1',
+    ),
+    Group(
+        '6',
+        label='S2',
+    ),
+    Group(
+        '7',
+        label='S3',
+    ),
+    Group(
+        '8',
+        label='J1',
+    ),
+    Group(
+        '9',
+        label='J2',
+    ),
+    Group(
+        '0',
+        label='J3',
+    ),
+
+]
 
 for i in groups:
     keys.extend(
@@ -101,8 +150,15 @@ for i in groups:
     )
 
 layouts = [
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
-    layout.Max(),
+    layout.Columns(
+        border_focus="#808080",
+        border_width=2,
+        fair=True,
+        grow_amount=4,
+        margin=5,
+        margin_on_single=5,
+    ),
+    # layout.Max(),
     # layout.Stack(num_stacks=2),
     # layout.Bsp(),
     # layout.Matrix(),
@@ -116,10 +172,22 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="sans",
-    fontsize=12,
-    padding=3,
+    font="CaskaydiaCove Nerd Font Mono",
+    padding=0,
+    fontsize=14,
 )
+
+widget_defaults_divider = dict(
+    font="CaskaydiaCove Nerd Font Mono",
+    padding=0,
+    fontsize=20,
+)
+
+widget_defaults_color = dict(
+    foreground=primary_colorscheme['fg'],
+    background=primary_colorscheme['bg_transparent']
+)
+
 extension_defaults = widget_defaults.copy()
 
 volume_config = {
@@ -133,52 +201,106 @@ screens = [
         wallpaper_mode="fill",
         top=bar.Bar(
             [
-                widget.Spacer(),
-                widget.CurrentLayout(),
+                widget.Clock(
+                    **widget_defaults,
+                    **widget_defaults_color,
+                ),
+
+                # widget.CurrentLayout(), I use single columns layout, so I dont need it
+
                 widget.GroupBox(
-                    active=colorscheme["fg"],
-                    background=colorscheme["bg"],
+                    **widget_defaults,
+
+                    active=primary_colorscheme['fg'],
+                    background=primary_colorscheme['bg_transparent'],
+
+                    inactive=primary_colorscheme['fg_inactive'],
+                    highlight_color='#FFFF00',
+
+
+                    this_screen_border=primary_colorscheme['fg'],
+                    foreground=primary_colorscheme['fg'],
+
+                    this_current_screen_border=primary_colorscheme['active'],
+
                     hide_unused=False,  # I love the true one, but it feels empty
-                    borderwidth=3,
-                    center_aligned=True,
+                    borderwidth=2,
+                    center_aligned=False,
                     disable_drag=True,
-                    font="sans",
-                    fontsize=15,
                     fontshadow=None,
-                    inactive=colorscheme["fg_dark"],
-                    highlight_color=colorscheme["dark5"],
-                    highlight_method="block",
+                    highlight_method="text",
                     markup=True,
                     rounded=False,
-                    this_screen_border=colorscheme["red"],
                 ),
+
+                # widget.WindowTabs(),
+
                 widget.Spacer(),
-                widget.Prompt(),
-                widget.CPU(format='CPU: {load_percent}%'),
+                # widget.Systray(
+                #     background=colorscheme["bg_transparent"],
+                # ),
+
+                # widget.Backlight(backlight_name="intel_backlight"), does not works on my machine :(
+
+                widget.CPU(
+                    **widget_defaults,
+                    **widget_defaults_color,
+                    format='CPU: {load_percent}%',
+                ),
+
+
                 widget.Net(
-                    format='{down} ↓↑ {up}',
+                    **widget_defaults,
+                    **widget_defaults_color,
+                    format=' {down} ↓↑{up} ',
                     prefix="M",
-                    fontsize=12,
-                    fontshadow=None,
-                    foreground=colorscheme["bg"],
-                    background=colorscheme["green1"]
                 ),
-                widget.Memory(measure_mem='G'),
+
+                widget.Memory(
+                    **widget_defaults,
+                    **widget_defaults_color,
+
+
+                    format=" MEM: {MemUsed: .0f}{mm} / {MemTotal:.0f}{mm} ",
+                    measure_mem='G',
+                ),
+
                 widget.PulseVolume(
+                    **widget_defaults,
+                    **widget_defaults_color,
+
                     limit_max_volume=True,
+
+                    fmt=" VOL: {} ",
                 ),
-                widget.Battery(format="{percent:2.0%} {hour:d}:{min:02d}"),
+
+                widget.Battery(
+                    **widget_defaults,
+                    **widget_defaults_color,
+
+                    format=" BTR: {percent:2.0%} ",
+                ),
+
                 widget.KeyboardLayout(
+                    **widget_defaults,
+                    **widget_defaults_color,
+
                     configured_keyboards=["us", "ru"],
                 ),
-                widget.Systray(),
-                widget.Clock(),
-                widget.QuickExit(),
+
+                widget.QuickExit(
+                    default_text="  \ue606",
+                    countdown_start=3,
+                    countdown_format="{}",
+                    background=primary_colorscheme['bg_transparent'],
+                    foreground=primary_colorscheme['fg'],
+                    **widget_defaults,
+                ),
             ],
-            24,
-            background=colorscheme["bg_transparent"],
-            # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
-            # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
+            20,
+            background=primary_colorscheme['bg_transparent'],
+            border_width=[2, 10, 2, 10],  # padding for the bar itself
+            border_color=["00000000", "00000000", "00000000", "00000000"]  # make this 'padding' transparent
         ),
     ),
 ]
