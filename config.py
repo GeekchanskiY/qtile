@@ -43,13 +43,28 @@ def autostart():
     home = os.path.expanduser('~/.config/qtile/startup.sh')
     subprocess.call([home])
 
+# Add widgets to add connected functions and keys to them
+
+kb_widget = widget.KeyboardLayout(
+                    **widget_defaults,
+                    **widget_defaults_color,
+                    fmt=' {} ',
+                    configured_keyboards=["us", "ru"],
+)
+
+@lazy.function 
+def change_keyboard_layout(qtile):
+    kb_widget.next_keyboard()
+
+
+#
 
 keys = [
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
-    Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
+    # Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
 
     Key([mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window to the left"),
     Key([mod, "shift"], "l", lazy.layout.shuffle_right(), desc="Move window to the right"),
@@ -78,7 +93,10 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawn("rofi -show run")),
 
-    Key([mod], "Print", lazy.spawn("gnome-screenshot -i"))
+    Key([mod], "Print", lazy.spawn("gnome-screenshot -i")),
+
+    Key([mod], "space", change_keyboard_layout),
+    # Key([mod], "и", change_keyboard_layout)
 
 ]
 
@@ -201,10 +219,6 @@ screens = [
         wallpaper_mode="fill",
         top=bar.Bar(
             [
-                widget.Clock(
-                    **widget_defaults,
-                    **widget_defaults_color,
-                ),
 
                 # widget.CurrentLayout(), I use single columns layout, so I dont need it
 
@@ -224,7 +238,10 @@ screens = [
                     this_current_screen_border=primary_colorscheme['active'],
 
                     hide_unused=False,  # I love the true one, but it feels empty
-                    borderwidth=2,
+
+                    fmt=' {}',
+
+                    borderwidth=0,
                     center_aligned=False,
                     disable_drag=True,
                     fontshadow=None,
@@ -235,10 +252,21 @@ screens = [
 
                 # widget.WindowTabs(),
 
-                widget.Spacer(),
+                widget.Spacer(
+                    # background='#00000000',
+                ),
                 # widget.Systray(
                 #     background=colorscheme["bg_transparent"],
                 # ),
+
+                widget.Clock(
+                    **widget_defaults,
+                    **widget_defaults_color,
+                ),
+
+                # widget.TaskList(),
+
+                widget.Spacer(),
 
                 # widget.Backlight(backlight_name="intel_backlight"), does not works on my machine :(
 
@@ -281,17 +309,12 @@ screens = [
                     format=" BTR: {percent:2.0%} ",
                 ),
 
-                widget.KeyboardLayout(
-                    **widget_defaults,
-                    **widget_defaults_color,
-
-                    configured_keyboards=["us", "ru"],
-                ),
+                kb_widget,
 
                 widget.QuickExit(
-                    default_text="  \ue606",
+                    default_text="  X",
                     countdown_start=3,
-                    countdown_format="{}",
+                    countdown_format="  {}",
                     background=primary_colorscheme['bg_transparent'],
                     foreground=primary_colorscheme['fg'],
                     **widget_defaults,
